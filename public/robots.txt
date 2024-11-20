@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://adityasblogs.netlify.app/sitemap.xml
+
+# Prevent access to admin pages
+Disallow: /admin
+Disallow: /login
