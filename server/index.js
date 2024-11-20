@@ -66,11 +66,20 @@ transporter.verify(function(error, success) {
 app.use(express.json());
 app.use(cookieParser());
 
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`\n=== ${new Date().toISOString()} ===`);
+  console.log(`${req.method} ${req.url}`);
+  console.log('Origin:', req.headers.origin);
+  console.log('Headers:', req.headers);
+  next();
+});
+
 // Define allowed origins
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3001',
-  process.env.FRONTEND_URL
+  'https://adityasblogs.netlify.app'
 ].filter(Boolean); // Remove any undefined values
 
 app.use(cors({
@@ -79,6 +88,7 @@ app.use(cors({
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) === -1) {
+      console.log('Blocked origin:', origin); // Add logging for debugging
       var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
     }
