@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ArrowLeft, Clock, Calendar, Tag, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_BASE_URL } from '../config';
 
 interface BlogPost {
   _id: string;
@@ -18,16 +19,29 @@ export default function BlogPost() {
   const { id } = useParams();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/api/posts/${id}`);
+        console.log('Fetching post from:', `${API_BASE_URL}/posts/${id}`);
+        const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch post: ${response.status} ${response.statusText}`);
+        }
+
         const data = await response.json();
         setPost(data);
-        setLoading(false);
+        setError(null);
       } catch (error) {
         console.error('Error fetching post:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch post');
+      } finally {
         setLoading(false);
       }
     };
@@ -50,6 +64,29 @@ export default function BlogPost() {
             <div className="h-4 w-full bg-gray-200 dark:bg-gray-800 rounded"></div>
             <div className="h-4 w-full bg-gray-200 dark:bg-gray-800 rounded"></div>
           </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="max-w-5xl mx-auto px-4 py-12"
+      >
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <div className="text-red-500 dark:text-red-400 text-lg font-medium">
+            {error}
+          </div>
+          <Link
+            to="/"
+            className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Home</span>
+          </Link>
         </div>
       </motion.div>
     );
