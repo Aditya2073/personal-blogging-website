@@ -72,6 +72,15 @@ const allowedOrigins = [
 // CORS configuration middleware
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  
+  // Log the request details
+  console.log('Incoming request:', {
+    method: req.method,
+    path: req.path,
+    origin: origin,
+    headers: req.headers
+  });
+
   if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -80,13 +89,13 @@ app.use((req, res, next) => {
       'Access-Control-Allow-Headers',
       'Content-Type, Authorization, Accept, Cookie, Cache-Control'
     );
-    // Add exposed headers if needed
     res.setHeader('Access-Control-Expose-Headers', 'Set-Cookie');
   }
   
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+    res.sendStatus(200);
+    return;
   }
   
   next();
@@ -100,18 +109,7 @@ app.use(cookieParser());
 app.use((req, res, next) => {
   console.log(`\n=== ${new Date().toISOString()} ===`);
   console.log(`${req.method} ${req.url}`);
-  console.log('Origin:', req.headers.origin);
   console.log('Headers:', req.headers);
-  next();
-});
-
-// Add request logging middleware
-app.use((req, res, next) => {
-  console.log(`\n=== ${new Date().toISOString()} ===`);
-  console.log(`${req.method} ${req.path}`);
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
-  console.log('Params:', req.params);
   next();
 });
 
@@ -144,14 +142,19 @@ app.get('/api/posts', async (req, res) => {
 
 app.get('/api/posts/:id', async (req, res) => {
   try {
+    console.log('Fetching post with ID:', req.params.id);
     const post = await Post.findById(req.params.id);
+    
     if (!post) {
+      console.log('Post not found');
       return res.status(404).json({ error: 'Post not found' });
     }
+
+    console.log('Post found:', post);
     res.json(post);
   } catch (error) {
-    console.error('Error fetching single post:', error);
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching post:', error);
+    res.status(500).json({ error: 'Failed to fetch post' });
   }
 });
 

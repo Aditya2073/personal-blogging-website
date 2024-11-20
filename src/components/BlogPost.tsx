@@ -31,11 +31,34 @@ export default function BlogPost() {
           }
         });
 
+        // Log the response details
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
         if (!response.ok) {
-          throw new Error(`Failed to fetch post: ${response.status} ${response.statusText}`);
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+          
+          try {
+            const errorData = JSON.parse(errorText);
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+          } catch (e) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
         }
 
-        const data = await response.json();
+        const responseText = await response.text();
+        console.log('Response text:', responseText);
+
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          console.error('Failed to parse response:', e);
+          throw new Error('Invalid response format');
+        }
+
+        console.log('Parsed post data:', data);
         setPost(data);
         setError(null);
       } catch (error) {
@@ -46,7 +69,12 @@ export default function BlogPost() {
       }
     };
 
-    fetchPost();
+    if (id) {
+      fetchPost();
+    } else {
+      setError('No post ID provided');
+      setLoading(false);
+    }
   }, [id]);
 
   if (loading) {
