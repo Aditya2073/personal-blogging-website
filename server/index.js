@@ -62,6 +62,31 @@ transporter.verify(function(error, success) {
   }
 });
 
+// Define allowed origins
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3001',
+  'https://adityasblogs.netlify.app'
+].filter(Boolean);
+
+// CORS configuration middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, Cookie');
+  }
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
+  next();
+});
+
 // Configure middleware
 app.use(express.json());
 app.use(cookieParser());
@@ -74,33 +99,6 @@ app.use((req, res, next) => {
   console.log('Headers:', req.headers);
   next();
 });
-
-// Define allowed origins
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3001',
-  'https://adityasblogs.netlify.app'
-].filter(Boolean); // Remove any undefined values
-
-app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) === -1) {
-      console.log('Blocked origin:', origin); // Add logging for debugging
-      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Cookie']
-}));
-
-// Mount newsletter routes
-app.use('/api/newsletters', newsletterRoutes);
 
 // Add request logging middleware
 app.use((req, res, next) => {
@@ -225,10 +223,11 @@ app.post('/api/login', async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    // Set cookie with proper settings
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true, // Always use secure in production
+      sameSite: 'none', // Required for cross-site cookies
       path: '/',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
@@ -243,8 +242,8 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/logout', (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'none',
     path: '/'
   });
   res.json({ message: 'Logged out successfully' });
