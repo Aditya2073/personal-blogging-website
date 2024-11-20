@@ -57,8 +57,7 @@ const AdminPanel: React.FC = () => {
         const response = await fetch(`${API_BASE_URL}/auth-status`, {
           credentials: 'include',
           headers: {
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache'
+            'Accept': 'application/json'
           }
         });
 
