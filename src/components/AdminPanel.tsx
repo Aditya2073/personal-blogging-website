@@ -54,7 +54,7 @@ const AdminPanel: React.FC = () => {
     const checkAuth = async () => {
       try {
         console.log('Checking authentication status...');
-        const response = await fetch('/api/auth-status', {
+        const response = await fetch(`${API_BASE_URL}/auth-status`, {
           credentials: 'include',
           headers: {
             'Accept': 'application/json',
@@ -67,10 +67,19 @@ const AdminPanel: React.FC = () => {
           throw new Error('Authentication failed');
         }
 
-        const data = await response.json();
-        console.log('Auth check successful:', data);
-        setIsAuthenticated(true);
-        fetchPosts();
+        const responseText = await response.text();
+        console.log('Raw auth response:', responseText);
+
+        let data;
+        try {
+          data = JSON.parse(responseText);
+          console.log('Auth check successful:', data);
+          setIsAuthenticated(true);
+          fetchPosts();
+        } catch (parseError) {
+          console.error('Failed to parse auth response:', parseError);
+          throw new Error('Invalid auth response');
+        }
       } catch (error) {
         console.error('Auth check failed:', error);
         navigate('/login');

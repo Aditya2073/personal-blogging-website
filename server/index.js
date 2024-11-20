@@ -250,6 +250,10 @@ app.post('/api/logout', (req, res) => {
   res.json({ message: 'Logged out successfully' });
 });
 
+app.get('/api/auth-status', auth, (req, res) => {
+  res.json({ authenticated: true });
+});
+
 app.post('/api/posts', auth, async (req, res) => {
   try {
     const post = new Post(req.body);
@@ -525,15 +529,6 @@ app.post('/api/subscribers/unsubscribe', async (req, res) => {
     console.error('Error unsubscribing:', error);
     res.status(500).json({ error: 'Failed to unsubscribe' });
   }
-});
-
-// Check auth status
-app.get('/api/auth-status', auth, (req, res) => {
-  res.json({ 
-    authenticated: true,
-    user: req.user,
-    message: 'Authentication valid'
-  });
 });
 
 const PORT = process.env.PORT || 3001;
