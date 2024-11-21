@@ -57,34 +57,41 @@ function BlogList() {
 
   // Get recent posts (last 3 posts)
   const recentPosts = React.useMemo(() => {
-    return [...posts]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 3);
-  }, [posts]);
+    const sorted = [...posts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return searchQuery.trim() === '' ? sorted.slice(0, 3) : [];
+  }, [posts, searchQuery]);
 
   // Filter and sort remaining posts
   const filteredPosts = React.useMemo(() => {
-    return posts
-      .filter(post => {
-        const matchesSearch = searchQuery === '' || 
-          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-        
-        const matchesTags = selectedTags.length === 0 ||
-          selectedTags.every(tag => post.tags.includes(tag));
-        
-        return matchesSearch && matchesTags;
-      })
-      .sort((a, b) => {
-        switch (sortBy) {
-          case 'oldest':
-            return new Date(a.date).getTime() - new Date(b.date).getTime();
-          case 'title':
-            return a.title.localeCompare(b.title);
-          default: // 'newest'
-            return new Date(b.date).getTime() - new Date(a.date).getTime();
-        }
-      });
+    let filtered = [...posts];
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(post => 
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+
+    // Apply tag filters
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter(post =>
+        selectedTags.every(tag => post.tags.includes(tag))
+      );
+    }
+
+    // Apply sorting
+    return filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'oldest':
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        case 'title':
+          return a.title.localeCompare(b.title);
+        default: // 'newest'
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+      }
+    });
   }, [posts, searchQuery, selectedTags, sortBy]);
 
   const toggleTag = (tag: string) => {
@@ -179,14 +186,16 @@ function BlogList() {
         </h1>
 
         {/* Recent Posts Section */}
-        <section className="mb-24">
-          <h2 className="text-2xl font-bold mb-8">Recent Posts</h2>
-          <div className="grid grid-cols-1 gap-12">
-            {recentPosts.map((post, index) => (
-              <PostCard key={post._id} post={post} index={index} featured={index === 0} />
-            ))}
-          </div>
-        </section>
+        {recentPosts.length > 0 && (
+          <section className="mb-24">
+            <h2 className="text-2xl font-bold mb-8">Recent Posts</h2>
+            <div className="grid grid-cols-1 gap-12">
+              {recentPosts.map((post, index) => (
+                <PostCard key={post._id} post={post} index={index} featured={index === 0} />
+              ))}
+            </div>
+          </section>
+        )}
         
         {/* All Posts Section */}
         <section>
@@ -201,7 +210,14 @@ function BlogList() {
                 type="text"
                 placeholder="Search posts..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchQuery(value);
+                  // Close filter panel when searching
+                  if (value.trim()) {
+                    setIsFilterOpen(false);
+                  }
+                }}
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all animate-scale-up"
               />
               {searchQuery && (
