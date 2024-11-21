@@ -15,5 +15,11 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['lucide-react'],
+    include: ['@splinetool/runtime'],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/@splinetool\/runtime/],
+    },
   },
 });

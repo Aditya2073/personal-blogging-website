@@ -9,7 +9,7 @@ function SplineBackground({ className = '' }: SplineBackgroundProps) {
   return (
     <div className={`fixed inset-0 -z-10 ${className}`}>
       <Spline 
-        scene="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
+        scene="https://prod.spline.design/VKFvP3W1J3BYeeh1/scene.splinecode"
         className="w-full h-full"
       />
     </div>
