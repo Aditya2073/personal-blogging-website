@@ -15,18 +15,17 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['@splinetool/runtime', '@splinetool/react-spline', 'lucide-react'],
+    esbuildOptions: {
+      target: 'es2020',
+    },
   },
   build: {
+    target: 'es2020',
     rollupOptions: {
       external: ['@splinetool/runtime', '@splinetool/react-spline'],
     },
-    commonjsOptions: {
-      include: [/@splinetool\/.*/, /lucide-react/],
-      defaultIsModuleExports: true,
-    },
   },
   resolve: {
-    mainFields: ['module', 'main', 'browser'],
     alias: {
       'react': 'react',
       'react-dom': 'react-dom',

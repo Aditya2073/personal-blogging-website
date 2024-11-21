@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ArrowUpRight, Search, Filter, X, ChevronDown } from 'lucide-react';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { motion } from 'framer-motion';
 import { API_BASE_URL } from '../config';
-import SplineBackground from './SplineBackground';
+const SplineBackground = React.lazy(() => import('./SplineBackground'));
 
 interface BlogPost {
   _id: string;
@@ -174,7 +174,9 @@ function BlogList() {
 
   return (
     <>
-      <SplineBackground className="opacity-50" />
+      <Suspense fallback={<div className="fixed inset-0 -z-10 bg-gray-100 dark:bg-gray-900" />}>
+        <SplineBackground className="opacity-50" />
+      </Suspense>
       <div className="space-y-8">
         <h1 className="text-7xl font-bold mb-16 text-center bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-gradient-glow">
           THE BLOG
