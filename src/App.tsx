@@ -9,6 +9,9 @@ import Newsletter from './components/Newsletter';
 import NewsletterManager from './components/NewsletterManager';
 import ConfirmSubscription from './components/ConfirmSubscription';
 import Login from './components/Login';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
+import Footer from './components/Footer';
 import { ThemeProvider } from './contexts/ThemeContext';
 import './styles/patterns.css';
 
@@ -16,9 +19,9 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
-        <div className="min-h-screen bg-white dark:bg-[#0a0b14] text-gray-900 dark:text-white transition-colors">
+        <div className="min-h-screen bg-white dark:bg-[#0a0b14] text-gray-900 dark:text-white transition-colors flex flex-col">
           <Navbar />
-          <main className="container mx-auto px-4 py-8">
+          <main className="container mx-auto px-4 py-8 flex-grow">
             <Routes>
               <Route path="/" element={<BlogList />} />
               <Route path="/blog/:id" element={<BlogPost />} />
@@ -28,10 +31,13 @@ function App() {
               <Route path="/newsletter" element={<Newsletter />} />
               <Route path="/confirm-subscription" element={<ConfirmSubscription />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
               {/* Redirect any unknown routes to home */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
+          <Footer />
         </div>
       </Router>
     </ThemeProvider>

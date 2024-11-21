@@ -5,6 +5,7 @@ import { ArrowLeft, Clock, Calendar, Tag, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../config';
 import { Helmet } from 'react-helmet';
+import GoogleAd from './GoogleAd';
 
 interface BlogPost {
   _id: string;
@@ -274,6 +275,9 @@ export default function BlogPost() {
               ))}
             </motion.div>
 
+            {/* Top Ad */}
+            <GoogleAd slot="1234567890" />
+
             {/* Article Content */}
             <motion.div 
               initial={{ opacity: 0 }}
@@ -292,21 +296,8 @@ export default function BlogPost() {
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
 
-            {/* Footer */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-              className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800"
-            >
-              <Link 
-                to="/"
-                className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 group transition-colors"
-              >
-                <ArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-                <span>Back to Blog</span>
-              </Link>
-            </motion.div>
+            {/* Bottom Ad */}
+            <GoogleAd slot="0987654321" />
           </motion.div>
         </motion.article>
       </AnimatePresence>
