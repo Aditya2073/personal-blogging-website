@@ -174,9 +174,7 @@ function BlogList() {
 
   return (
     <div className="relative min-h-screen">
-      <Suspense fallback={<div className="fixed inset-0 -z-10 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800" />}>
-        <SplineBackground className="opacity-30" />
-      </Suspense>
+      <SplineBackground className="opacity-40" />
       <div className="relative z-10 space-y-8 container mx-auto px-4 py-8">
         <h1 className="text-7xl font-bold mb-16 text-center bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-gradient-glow">
           THE BLOG
