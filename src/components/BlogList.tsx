@@ -174,8 +174,8 @@ function BlogList() {
 
   return (
     <div className="relative min-h-screen">
-      <SplineBackground className="opacity-40" />
-      <div className="relative z-10 space-y-8 container mx-auto px-4 py-8">
+      <SplineBackground className="opacity-60" />
+      <div className="relative z-10 space-y-8 container mx-auto px-4 py-8 backdrop-blur-sm">
         <h1 className="text-7xl font-bold mb-16 text-center bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-gradient-glow">
           THE BLOG
         </h1>
