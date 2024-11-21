@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { ArrowUpRight, Search, Filter, X, ChevronDown } from 'lucide-react';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { motion } from 'framer-motion';
@@ -104,11 +104,21 @@ function BlogList() {
     });
   }, [posts, searchQuery, selectedTags, sortBy]);
 
-  // Get recent posts (last 3 posts)
+  // Get recent posts (only from today or yesterday)
   const recentPosts = React.useMemo(() => {
     if (searchQuery.trim() !== '') return [];
 
-    const validPosts = posts.filter(post => post && post.title && post.date);
+    const validPosts = posts.filter(post => {
+      if (!post || !post.title || !post.date) return false;
+      
+      try {
+        const postDate = parseISO(post.date);
+        return isToday(postDate) || isYesterday(postDate);
+      } catch (error) {
+        console.error('Error parsing date:', error);
+        return false;
+      }
+    });
     
     return validPosts
       .sort((a, b) => {
@@ -118,8 +128,7 @@ function BlogList() {
           console.error('Error sorting recent posts:', error);
           return 0;
         }
-      })
-      .slice(0, 3);
+      });
   }, [posts, searchQuery]);
 
   const toggleTag = (tag: string) => {
@@ -234,7 +243,12 @@ function BlogList() {
         {recentPosts.length > 0 && (
           <section className="mb-24">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">Recent Posts</h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">Recent Posts</h2>
+                <span className="px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400">
+                  Last 24 hours
+                </span>
+              </div>
               <div className="h-[2px] flex-1 mx-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20"></div>
             </div>
             <div className="grid grid-cols-1 gap-12">
