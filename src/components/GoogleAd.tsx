@@ -28,7 +28,7 @@ const GoogleAd: React.FC<GoogleAdProps> = ({ slot, format = 'auto', style }) => 
       <ins
         className="adsbygoogle"
         style={style || { display: 'block' }}
-        data-ad-client="ca-pub-YOUR_PUBLISHER_ID" // You'll replace this with your AdSense publisher ID
+        data-ad-client="ca-pub-9746960450893709" // You'll replace this with your AdSense publisher ID
         data-ad-slot={slot}
         data-ad-format={format}
         data-full-width-responsive="true"
