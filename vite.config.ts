@@ -22,7 +22,11 @@ export default defineConfig({
   build: {
     target: 'es2020',
     rollupOptions: {
-      external: ['@splinetool/runtime', '@splinetool/react-spline'],
+      output: {
+        manualChunks: {
+          spline: ['@splinetool/runtime', '@splinetool/react-spline'],
+        },
+      },
     },
   },
   resolve: {
