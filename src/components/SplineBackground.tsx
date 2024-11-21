@@ -7,7 +7,6 @@ interface SplineBackgroundProps {
 function SplineBackground({ className = '' }: SplineBackgroundProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -18,32 +17,12 @@ function SplineBackground({ className = '' }: SplineBackgroundProps) {
       setIsLoaded(true);
     };
 
-    const handleError = () => {
-      console.error('Background iframe failed to load');
-      setError('Failed to load background animation');
-    };
-
     iframe.addEventListener('load', handleLoad);
-    iframe.addEventListener('error', handleError);
-
-    return () => {
-      iframe.removeEventListener('load', handleLoad);
-      iframe.removeEventListener('error', handleError);
-    };
+    return () => iframe.removeEventListener('load', handleLoad);
   }, []);
 
-  if (error) {
-    return (
-      <div className={`fixed inset-0 -z-10 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 ${className}`}>
-        <div className="absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400">
-          {error}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 -z-1 overflow-hidden" style={{ zIndex: -1 }}>
+    <div className={`fixed inset-0 overflow-hidden ${className}`} style={{ zIndex: -1 }}>
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100/50 to-gray-200/50 dark:from-gray-900/50 dark:to-gray-800/50">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -64,8 +43,9 @@ function SplineBackground({ className = '' }: SplineBackgroundProps) {
           pointerEvents: 'none',
           backgroundColor: 'transparent',
           transform: 'scale(1.2)',
-          opacity: isLoaded ? 0.6 : 0,
-          transition: 'opacity 0.3s ease-in-out'
+          opacity: isLoaded ? 0.4 : 0,
+          transition: 'opacity 0.5s ease-in-out',
+          willChange: 'transform, opacity'
         }}
         title="Particle Nebula Background"
         loading="eager"

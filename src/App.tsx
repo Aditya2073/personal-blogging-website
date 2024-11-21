@@ -19,9 +19,9 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
-        <div className="min-h-screen text-gray-900 dark:text-white transition-colors flex flex-col relative">
+        <div className="min-h-screen text-gray-900 dark:text-white transition-colors flex flex-col">
           <Navbar />
-          <main className="container mx-auto px-4 py-8 flex-grow relative">
+          <main className="container mx-auto px-4 py-8 flex-grow">
             <Routes>
               <Route path="/" element={<BlogList />} />
               <Route path="/blog/:id" element={<BlogPost />} />
