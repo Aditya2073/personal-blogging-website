@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 
 interface GoogleAdProps {
-  slot: string;
+  slot?: string;
   format?: 'auto' | 'fluid' | 'rectangle' | 'vertical';
   style?: React.CSSProperties;
+  className?: string;
 }
 
 declare global {
@@ -12,11 +13,16 @@ declare global {
   }
 }
 
-const GoogleAd: React.FC<GoogleAdProps> = ({ slot, format = 'auto', style }) => {
+const GoogleAd: React.FC<GoogleAdProps> = ({ 
+  slot = "2195931887", // Default to Home-page ad slot
+  format = 'auto', 
+  style,
+  className = ""
+}) => {
   useEffect(() => {
     try {
       if (window.adsbygoogle) {
-        window.adsbygoogle.push({});
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
       }
     } catch (error) {
       console.error('Error loading Google AdSense:', error);
@@ -24,11 +30,11 @@ const GoogleAd: React.FC<GoogleAdProps> = ({ slot, format = 'auto', style }) => 
   }, []);
 
   return (
-    <div className="google-ad-container my-4">
+    <div className={`google-ad-container my-4 ${className}`}>
       <ins
         className="adsbygoogle"
         style={style || { display: 'block' }}
-        data-ad-client="ca-pub-9746960450893709" // You'll replace this with your AdSense publisher ID
+        data-ad-client="ca-pub-9746960450893709"
         data-ad-slot={slot}
         data-ad-format={format}
         data-full-width-responsive="true"
