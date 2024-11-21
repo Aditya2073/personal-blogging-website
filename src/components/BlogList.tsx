@@ -57,17 +57,16 @@ function BlogList() {
 
   // Filter and sort remaining posts
   const filteredPosts = React.useMemo(() => {
-    let filtered = posts.filter(post => 
-      post && post.title && post.excerpt && post.tags && Array.isArray(post.tags)
-    );
+    // Start with all valid posts
+    let filtered = posts.filter(post => post && post.title);
 
     // Apply search filter
     if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
       filtered = filtered.filter(post => {
-        const query = searchQuery.toLowerCase();
-        const title = post.title?.toLowerCase() || '';
-        const excerpt = post.excerpt?.toLowerCase() || '';
-        const tags = post.tags?.map(tag => tag?.toLowerCase() || '').filter(Boolean) || [];
+        const title = (post.title || '').toLowerCase();
+        const excerpt = (post.excerpt || '').toLowerCase();
+        const tags = Array.isArray(post.tags) ? post.tags.map(tag => (tag || '').toLowerCase()) : [];
 
         return (
           title.includes(query) ||
@@ -79,9 +78,12 @@ function BlogList() {
 
     // Apply tag filters
     if (selectedTags.length > 0) {
-      filtered = filtered.filter(post =>
-        post.tags && selectedTags.every(tag => post.tags.includes(tag))
-      );
+      filtered = filtered.filter(post => {
+        if (!Array.isArray(post.tags)) return false;
+        return selectedTags.every(selectedTag => 
+          post.tags.some(postTag => postTag.toLowerCase() === selectedTag.toLowerCase())
+        );
+      });
     }
 
     // Apply sorting
@@ -89,11 +91,11 @@ function BlogList() {
       try {
         switch (sortBy) {
           case 'oldest':
-            return new Date(a.date).getTime() - new Date(b.date).getTime();
+            return new Date(a.date || '').getTime() - new Date(b.date || '').getTime();
           case 'title':
             return (a.title || '').localeCompare(b.title || '');
           default: // 'newest'
-            return new Date(b.date).getTime() - new Date(a.date).getTime();
+            return new Date(b.date || '').getTime() - new Date(a.date || '').getTime();
         }
       } catch (error) {
         console.error('Error sorting posts:', error);
@@ -106,14 +108,12 @@ function BlogList() {
   const recentPosts = React.useMemo(() => {
     if (searchQuery.trim() !== '') return [];
 
-    const validPosts = posts.filter(post => 
-      post && post.title && post.date && post.tags && Array.isArray(post.tags)
-    );
-
+    const validPosts = posts.filter(post => post && post.title && post.date);
+    
     return validPosts
       .sort((a, b) => {
         try {
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
+          return new Date(b.date || '').getTime() - new Date(a.date || '').getTime();
         } catch (error) {
           console.error('Error sorting recent posts:', error);
           return 0;
