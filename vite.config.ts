@@ -13,18 +13,12 @@ export default defineConfig({
       },
     },
   },
-  optimizeDeps: {
-    include: ['@splinetool/runtime', '@splinetool/react-spline', 'lucide-react'],
-    esbuildOptions: {
-      target: 'es2020',
-    },
-  },
   build: {
     target: 'es2020',
     rollupOptions: {
       output: {
         manualChunks: {
-          spline: ['@splinetool/runtime', '@splinetool/react-spline'],
+          vendor: ['react', 'react-dom', 'react-router-dom'],
         },
       },
     },

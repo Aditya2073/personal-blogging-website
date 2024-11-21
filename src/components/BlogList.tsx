@@ -1,11 +1,11 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ArrowUpRight, Search, Filter, X, ChevronDown } from 'lucide-react';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { motion } from 'framer-motion';
 import { API_BASE_URL } from '../config';
-const SplineBackground = React.lazy(() => import('./SplineBackground'));
+import SplineBackground from './SplineBackground';
 
 interface BlogPost {
   _id: string;
