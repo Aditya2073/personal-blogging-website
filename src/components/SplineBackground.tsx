@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface SplineBackgroundProps {
   className?: string;
@@ -9,6 +9,14 @@ function SplineBackground({ className = '' }: SplineBackgroundProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Temporarily suppress console logs from Spline
+    const originalConsoleLog = console.log;
+    console.log = (...args) => {
+      if (!args[0]?.type?.includes('Particle')) {
+        originalConsoleLog(...args);
+      }
+    };
+
     import('@splinetool/react-spline')
       .then((module) => {
         setSpline(() => module.default);
@@ -17,7 +25,16 @@ function SplineBackground({ className = '' }: SplineBackgroundProps) {
         console.error('Failed to load Spline:', err);
         setError('Failed to load 3D animation');
       });
+
+    // Cleanup function to restore console.log
+    return () => {
+      console.log = originalConsoleLog;
+    };
   }, []);
+
+  const onLoad = () => {
+    // Optional: Add any initialization logic here
+  };
 
   if (error) {
     return (
@@ -44,6 +61,7 @@ function SplineBackground({ className = '' }: SplineBackgroundProps) {
       <Spline 
         scene="https://prod.spline.design/VKFvP3W1J3BYeeh1/scene.splinecode"
         className="w-full h-full"
+        onLoad={onLoad}
       />
     </div>
   );
