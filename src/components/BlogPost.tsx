@@ -33,10 +33,6 @@ export default function BlogPost() {
           }
         });
 
-        // Log the response details
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
         if (!response.ok) {
           const errorText = await response.text();
           console.error('Error response:', errorText);
@@ -50,8 +46,6 @@ export default function BlogPost() {
         }
 
         const responseText = await response.text();
-        console.log('Response text:', responseText);
-
         let data;
         try {
           data = JSON.parse(responseText);
@@ -60,7 +54,6 @@ export default function BlogPost() {
           throw new Error('Invalid response format');
         }
 
-        console.log('Parsed post data:', data);
         setPost(data);
         setError(null);
       } catch (error) {
@@ -275,8 +268,10 @@ export default function BlogPost() {
               ))}
             </motion.div>
 
-            {/* Top Ad */}
-            <GoogleAd slot="1234567890" />
+            {/* Top Ad - Homepage */}
+            <div className="mb-8">
+              <GoogleAd />
+            </div>
 
             {/* Article Content */}
             <motion.div 
@@ -296,8 +291,18 @@ export default function BlogPost() {
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
 
-            {/* Bottom Ad */}
-            <GoogleAd slot="0987654321" />
+            {/* Square Ad */}
+            <div className="my-8 flex justify-center">
+              <GoogleAd 
+                slot="1899311193"
+                format="rectangle"
+                style={{ 
+                  display: 'inline-block',
+                  width: '336px',
+                  height: '280px'
+                }}
+              />
+            </div>
           </motion.div>
         </motion.article>
       </AnimatePresence>
