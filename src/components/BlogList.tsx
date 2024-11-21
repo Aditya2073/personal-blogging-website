@@ -55,44 +55,72 @@ function BlogList() {
       });
   }, []);
 
-  // Get recent posts (last 3 posts)
-  const recentPosts = React.useMemo(() => {
-    const sorted = [...posts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return searchQuery.trim() === '' ? sorted.slice(0, 3) : [];
-  }, [posts, searchQuery]);
-
   // Filter and sort remaining posts
   const filteredPosts = React.useMemo(() => {
-    let filtered = [...posts];
+    let filtered = posts.filter(post => 
+      post && post.title && post.excerpt && post.tags && Array.isArray(post.tags)
+    );
 
     // Apply search filter
     if (searchQuery.trim()) {
-      filtered = filtered.filter(post => 
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
+      filtered = filtered.filter(post => {
+        const query = searchQuery.toLowerCase();
+        const title = post.title?.toLowerCase() || '';
+        const excerpt = post.excerpt?.toLowerCase() || '';
+        const tags = post.tags?.map(tag => tag?.toLowerCase() || '').filter(Boolean) || [];
+
+        return (
+          title.includes(query) ||
+          excerpt.includes(query) ||
+          tags.some(tag => tag.includes(query))
+        );
+      });
     }
 
     // Apply tag filters
     if (selectedTags.length > 0) {
       filtered = filtered.filter(post =>
-        selectedTags.every(tag => post.tags.includes(tag))
+        post.tags && selectedTags.every(tag => post.tags.includes(tag))
       );
     }
 
     // Apply sorting
     return filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'oldest':
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
-        case 'title':
-          return a.title.localeCompare(b.title);
-        default: // 'newest'
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
+      try {
+        switch (sortBy) {
+          case 'oldest':
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+          case 'title':
+            return (a.title || '').localeCompare(b.title || '');
+          default: // 'newest'
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
+        }
+      } catch (error) {
+        console.error('Error sorting posts:', error);
+        return 0;
       }
     });
   }, [posts, searchQuery, selectedTags, sortBy]);
+
+  // Get recent posts (last 3 posts)
+  const recentPosts = React.useMemo(() => {
+    if (searchQuery.trim() !== '') return [];
+
+    const validPosts = posts.filter(post => 
+      post && post.title && post.date && post.tags && Array.isArray(post.tags)
+    );
+
+    return validPosts
+      .sort((a, b) => {
+        try {
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        } catch (error) {
+          console.error('Error sorting recent posts:', error);
+          return 0;
+        }
+      })
+      .slice(0, 3);
+  }, [posts, searchQuery]);
 
   const toggleTag = (tag: string) => {
     setSelectedTags(prev => 
@@ -133,50 +161,60 @@ function BlogList() {
     );
   }
 
-  const PostCard = ({ post, index, featured = false }: { post: BlogPost; index: number; featured?: boolean }) => (
-    <Link 
-      to={`/blog/${post._id}`} 
-      key={post._id}
-      className={`animate-slide-up ${featured ? 'col-span-full' : ''}`}
-      style={{ animationDelay: `${index * 0.1}s` }}
-    >
-      <article className={`group cursor-pointer ${featured ? 'grid md:grid-cols-2 gap-8 items-center' : ''}`}>
-        <div className={`aspect-video mb-4 overflow-hidden rounded-xl shadow-md transition-all group-hover:shadow-xl ${featured ? 'mb-0' : ''}`}>
-          <img
-            src={post.coverImage}
-            alt={post.title}
-            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
-          />
-        </div>
-        
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-            <time>{format(new Date(post.date), 'MMMM d, yyyy')}</time>
-            <span className="w-1 h-1 rounded-full bg-gray-400" />
-            <span>{post.tags[0]}</span>
+  const PostCard = ({ post, index, featured = false }: { post: BlogPost; index: number; featured?: boolean }) => {
+    if (!post || !post.title || !post.date || !post.tags || !Array.isArray(post.tags)) {
+      return null;
+    }
+
+    return (
+      <Link 
+        to={`/blog/${post._id}`} 
+        key={post._id}
+        className={`animate-slide-up ${featured ? 'col-span-full' : ''}`}
+        style={{ animationDelay: `${index * 0.1}s` }}
+      >
+        <article className={`group cursor-pointer ${featured ? 'grid md:grid-cols-2 gap-8 items-center' : ''}`}>
+          <div className={`aspect-video mb-4 overflow-hidden rounded-xl shadow-md transition-all group-hover:shadow-xl ${featured ? 'mb-0' : ''}`}>
+            <img
+              src={post.coverImage || 'https://via.placeholder.com/800x400'}
+              alt={post.title}
+              className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'https://via.placeholder.com/800x400';
+              }}
+            />
           </div>
           
-          <h3 className={`${featured ? 'text-3xl' : 'text-xl'} font-semibold group-hover:text-blue-500 dark:group-hover:text-blue-400 flex items-center gap-2 transition-colors`}>
-            {post.title}
-            <ArrowUpRight className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" size={featured ? 24 : 20} />
-          </h3>
-          
-          <p className="text-gray-600 dark:text-gray-400 line-clamp-2">{post.excerpt}</p>
-          
-          <div className="flex gap-2 pt-2">
-            {post.tags.slice(1).map(tag => (
-              <span
-                key={tag}
-                className="px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:animate-bounce-subtle"
-              >
-                {tag}
-              </span>
-            ))}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+              <time>{format(new Date(post.date), 'MMMM d, yyyy')}</time>
+              <span className="w-1 h-1 rounded-full bg-gray-400" />
+              <span>{post.tags[0]}</span>
+            </div>
+            
+            <h3 className={`${featured ? 'text-3xl' : 'text-xl'} font-semibold group-hover:text-blue-500 dark:group-hover:text-blue-400 flex items-center gap-2 transition-colors`}>
+              {post.title}
+              <ArrowUpRight className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" size={featured ? 24 : 20} />
+            </h3>
+            
+            <p className="text-gray-600 dark:text-gray-400 line-clamp-2">{post.excerpt}</p>
+            
+            <div className="flex gap-2 pt-2">
+              {post.tags.slice(1).map(tag => (
+                <span
+                  key={tag}
+                  className="px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:animate-bounce-subtle"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-      </article>
-    </Link>
-  );
+        </article>
+      </Link>
+    );
+  };
 
   return (
     <div className="relative min-h-screen">
