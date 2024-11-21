@@ -5,7 +5,6 @@ import { ArrowUpRight, Search, Filter, X, ChevronDown } from 'lucide-react';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { motion } from 'framer-motion';
 import { API_BASE_URL } from '../config';
-import SplineBackground from './SplineBackground';
 
 interface BlogPost {
   _id: string;
@@ -174,8 +173,7 @@ function BlogList() {
 
   return (
     <div className="relative min-h-screen">
-      <SplineBackground />
-      <div className="relative z-10 space-y-8">
+      <div className="space-y-8">
         <h1 className="text-7xl font-bold mb-16 text-center bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-gradient-glow">
           THE BLOG
         </h1>

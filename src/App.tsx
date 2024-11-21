@@ -19,7 +19,7 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
-        <div className="min-h-screen text-gray-900 dark:text-white transition-colors flex flex-col">
+        <div className="min-h-screen bg-white dark:bg-[#0a0b14] text-gray-900 dark:text-white transition-colors flex flex-col">
           <Navbar />
           <main className="container mx-auto px-4 py-8 flex-grow">
             <Routes>
