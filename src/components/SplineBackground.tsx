@@ -9,31 +9,46 @@ function SplineBackground({ className = '' }: SplineBackgroundProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Temporarily suppress console logs from Spline
+    // Suppress non-essential console logs
     const originalConsoleLog = console.log;
+    const originalConsoleWarn = console.warn;
+    
     console.log = (...args) => {
       if (!args[0]?.type?.includes('Particle')) {
         originalConsoleLog(...args);
       }
     };
 
-    import('@splinetool/react-spline')
-      .then((module) => {
+    console.warn = (...args) => {
+      if (!args[0]?.includes('splinecode file')) {
+        originalConsoleWarn(...args);
+      }
+    };
+
+    const loadSpline = async () => {
+      try {
+        const module = await import('@splinetool/react-spline');
         setSpline(() => module.default);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('Failed to load Spline:', err);
         setError('Failed to load 3D animation');
-      });
+      }
+    };
 
-    // Cleanup function to restore console.log
+    loadSpline();
+
     return () => {
       console.log = originalConsoleLog;
+      console.warn = originalConsoleWarn;
     };
   }, []);
 
   const onLoad = () => {
-    // Optional: Add any initialization logic here
+    // Optional: Add initialization logic here
+  };
+
+  const onError = () => {
+    setError('Failed to load 3D animation');
   };
 
   if (error) {
@@ -62,6 +77,7 @@ function SplineBackground({ className = '' }: SplineBackgroundProps) {
         scene="https://prod.spline.design/VKFvP3W1J3BYeeh1/scene.splinecode"
         className="w-full h-full"
         onLoad={onLoad}
+        onError={onError}
       />
     </div>
   );
