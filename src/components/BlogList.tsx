@@ -173,8 +173,8 @@ function BlogList() {
         className={`animate-slide-up ${featured ? 'col-span-full' : ''}`}
         style={{ animationDelay: `${index * 0.1}s` }}
       >
-        <article className={`group cursor-pointer ${featured ? 'grid md:grid-cols-2 gap-8 items-center' : ''}`}>
-          <div className={`aspect-video mb-4 overflow-hidden rounded-xl shadow-md transition-all group-hover:shadow-xl ${featured ? 'mb-0' : ''}`}>
+        <article className={`group cursor-pointer bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 ${featured ? 'grid md:grid-cols-2 gap-8' : ''}`}>
+          <div className={`aspect-video overflow-hidden ${featured ? 'mb-0' : ''}`}>
             <img
               src={post.coverImage || 'https://via.placeholder.com/800x400'}
               alt={post.title}
@@ -186,25 +186,25 @@ function BlogList() {
             />
           </div>
           
-          <div className="space-y-3">
+          <div className="p-6 space-y-4">
             <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
               <time>{format(new Date(post.date), 'MMMM d, yyyy')}</time>
               <span className="w-1 h-1 rounded-full bg-gray-400" />
               <span>{post.tags[0]}</span>
             </div>
             
-            <h3 className={`${featured ? 'text-3xl' : 'text-xl'} font-semibold group-hover:text-blue-500 dark:group-hover:text-blue-400 flex items-center gap-2 transition-colors`}>
+            <h3 className={`${featured ? 'text-3xl' : 'text-2xl'} font-semibold group-hover:text-blue-500 dark:group-hover:text-blue-400 flex items-center gap-2 transition-colors line-clamp-2`}>
               {post.title}
               <ArrowUpRight className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" size={featured ? 24 : 20} />
             </h3>
             
             <p className="text-gray-600 dark:text-gray-400 line-clamp-2">{post.excerpt}</p>
             
-            <div className="flex gap-2 pt-2">
+            <div className="flex flex-wrap gap-2 pt-2">
               {post.tags.slice(1).map(tag => (
                 <span
                   key={tag}
-                  className="px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:animate-bounce-subtle"
+                  className="px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
                 >
                   {tag}
                 </span>
@@ -218,15 +218,25 @@ function BlogList() {
 
   return (
     <div className="relative min-h-screen">
-      <div className="space-y-8">
-        <h1 className="text-7xl font-bold mb-16 text-center bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-gradient-glow">
-          THE BLOG
-        </h1>
+      <div className="space-y-12 px-4 sm:px-6 lg:px-8">
+        {/* Hero Section */}
+        <div className="relative py-20 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-blue-500/10 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-blue-500/20 -z-10"></div>
+          <h1 className="text-5xl sm:text-7xl font-bold text-center bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 dark:from-blue-400 dark:via-purple-400 dark:to-blue-400 bg-clip-text text-transparent animate-gradient-glow">
+            THE BLOG
+          </h1>
+          <p className="mt-4 text-center text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Exploring technology, design, and everything in between
+          </p>
+        </div>
 
         {/* Recent Posts Section */}
         {recentPosts.length > 0 && (
           <section className="mb-24">
-            <h2 className="text-2xl font-bold mb-8">Recent Posts</h2>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">Recent Posts</h2>
+              <div className="h-[2px] flex-1 mx-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20"></div>
+            </div>
             <div className="grid grid-cols-1 gap-12">
               {recentPosts.map((post, index) => (
                 <PostCard key={post._id} post={post} index={index} featured={index === 0} />
@@ -237,88 +247,93 @@ function BlogList() {
         
         {/* All Posts Section */}
         <section>
-          <h2 className="text-2xl font-bold mb-8">All Posts</h2>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">All Posts</h2>
+            <div className="h-[2px] flex-1 mx-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20"></div>
+          </div>
           
           {/* Search and Filter Section */}
           <div className="mb-12 space-y-4 animate-slide-down">
-            {/* Search Bar */}
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors" size={20} />
-              <input
-                type="text"
-                placeholder="Search posts..."
-                value={searchQuery}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setSearchQuery(value);
-                  // Close filter panel when searching
-                  if (value.trim()) {
-                    setIsFilterOpen(false);
-                  }
-                }}
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all animate-scale-up"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors animate-fade-in"
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-
-            {/* Filter Button and Panel */}
-            <div className="relative animate-slide-up">
-              <button
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all group"
-              >
-                <Filter size={20} className="group-hover:text-blue-500 transition-colors" />
-                <span className="group-hover:text-blue-500 transition-colors">Filters</span>
-                <ChevronDown
-                  size={16}
-                  className={`transform transition-transform group-hover:text-blue-500 ${isFilterOpen ? 'rotate-180' : ''}`}
+            <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] gap-4">
+              {/* Search Bar */}
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search posts..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSearchQuery(value);
+                    if (value.trim()) {
+                      setIsFilterOpen(false);
+                    }
+                  }}
+                  className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all animate-scale-up"
                 />
-              </button>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors animate-fade-in"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
 
-              {isFilterOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl z-10 animate-scale-up">
-                  {/* Sort Options */}
-                  <div className="mb-6">
-                    <h3 className="font-medium mb-3">Sort by</h3>
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as SortOption)}
-                      className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                    >
-                      <option value="newest">Newest First</option>
-                      <option value="oldest">Oldest First</option>
-                      <option value="title">Title</option>
-                    </select>
-                  </div>
+              {/* Filter Button */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all group w-full md:w-auto justify-center"
+                >
+                  <Filter size={20} className="group-hover:text-blue-500 transition-colors" />
+                  <span className="group-hover:text-blue-500 transition-colors">Filters</span>
+                  <ChevronDown
+                    size={16}
+                    className={`transform transition-transform group-hover:text-blue-500 ${isFilterOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
 
-                  {/* Tags Filter */}
-                  <div>
-                    <h3 className="font-medium mb-3">Filter by tags</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {allTags.map(tag => (
-                        <button
-                          key={tag}
-                          onClick={() => toggleTag(tag)}
-                          className={`px-4 py-2 rounded-xl text-sm transition-all ${
-                            selectedTags.includes(tag)
-                              ? 'bg-blue-500 text-white shadow-md hover:bg-blue-600'
-                              : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
-                          }`}
-                        >
-                          {tag}
-                        </button>
-                      ))}
+                {/* Filter Panel */}
+                {isFilterOpen && (
+                  <div className="absolute top-full right-0 mt-2 p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl z-10 animate-scale-up min-w-[300px]">
+                    {/* Sort Options */}
+                    <div className="mb-6">
+                      <h3 className="font-medium mb-3 text-gray-700 dark:text-gray-300">Sort by</h3>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as SortOption)}
+                        className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      >
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="title">Title</option>
+                      </select>
+                    </div>
+
+                    {/* Tags Filter */}
+                    <div>
+                      <h3 className="font-medium mb-3 text-gray-700 dark:text-gray-300">Filter by tags</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {allTags.map(tag => (
+                          <button
+                            key={tag}
+                            onClick={() => toggleTag(tag)}
+                            className={`px-4 py-2 rounded-xl text-sm transition-all ${
+                              selectedTags.includes(tag)
+                                ? 'bg-blue-500 text-white shadow-md hover:bg-blue-600'
+                                : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                            }`}
+                          >
+                            {tag}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Active Filters Display */}
@@ -328,7 +343,7 @@ function BlogList() {
                   <button
                     key={tag}
                     onClick={() => toggleTag(tag)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm bg-blue-500 text-white shadow-sm hover:bg-blue-600 hover:shadow-md transition-all"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-sm hover:shadow-md transition-all"
                   >
                     {tag}
                     <X size={14} />
