@@ -5,6 +5,7 @@ import { ArrowUpRight, Search, Filter, X, ChevronDown } from 'lucide-react';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { motion } from 'framer-motion';
 import { API_BASE_URL } from '../config';
+import SplineBackground from './SplineBackground';
 
 interface BlogPost {
   _id: string;
@@ -172,137 +173,140 @@ function BlogList() {
   );
 
   return (
-    <div className="max-w-5xl mx-auto animate-fade-in">
-      <h1 className="text-7xl font-bold mb-16 text-center bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-gradient-glow">
-        THE BLOG
-      </h1>
+    <>
+      <SplineBackground className="opacity-50" />
+      <div className="space-y-8">
+        <h1 className="text-7xl font-bold mb-16 text-center bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-gradient-glow">
+          THE BLOG
+        </h1>
 
-      {/* Recent Posts Section */}
-      <section className="mb-24">
-        <h2 className="text-2xl font-bold mb-8">Recent Posts</h2>
-        <div className="grid grid-cols-1 gap-12">
-          {recentPosts.map((post, index) => (
-            <PostCard key={post._id} post={post} index={index} featured={index === 0} />
-          ))}
-        </div>
-      </section>
-      
-      {/* All Posts Section */}
-      <section>
-        <h2 className="text-2xl font-bold mb-8">All Posts</h2>
-        
-        {/* Search and Filter Section */}
-        <div className="mb-12 space-y-4 animate-slide-down">
-          {/* Search Bar */}
-          <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors" size={20} />
-            <input
-              type="text"
-              placeholder="Search posts..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all animate-scale-up"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors animate-fade-in"
-              >
-                <X size={16} />
-              </button>
-            )}
+        {/* Recent Posts Section */}
+        <section className="mb-24">
+          <h2 className="text-2xl font-bold mb-8">Recent Posts</h2>
+          <div className="grid grid-cols-1 gap-12">
+            {recentPosts.map((post, index) => (
+              <PostCard key={post._id} post={post} index={index} featured={index === 0} />
+            ))}
           </div>
-
-          {/* Filter Button and Panel */}
-          <div className="relative animate-slide-up">
-            <button
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all group"
-            >
-              <Filter size={20} className="group-hover:text-blue-500 transition-colors" />
-              <span className="group-hover:text-blue-500 transition-colors">Filters</span>
-              <ChevronDown
-                size={16}
-                className={`transform transition-transform group-hover:text-blue-500 ${isFilterOpen ? 'rotate-180' : ''}`}
+        </section>
+        
+        {/* All Posts Section */}
+        <section>
+          <h2 className="text-2xl font-bold mb-8">All Posts</h2>
+          
+          {/* Search and Filter Section */}
+          <div className="mb-12 space-y-4 animate-slide-down">
+            {/* Search Bar */}
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors" size={20} />
+              <input
+                type="text"
+                placeholder="Search posts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm hover:shadow-md transition-all animate-scale-up"
               />
-            </button>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors animate-fade-in"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
 
-            {isFilterOpen && (
-              <div className="absolute top-full left-0 right-0 mt-2 p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl z-10 animate-scale-up">
-                {/* Sort Options */}
-                <div className="mb-6">
-                  <h3 className="font-medium mb-3">Sort by</h3>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  >
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                    <option value="title">Title</option>
-                  </select>
-                </div>
+            {/* Filter Button and Panel */}
+            <div className="relative animate-slide-up">
+              <button
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all group"
+              >
+                <Filter size={20} className="group-hover:text-blue-500 transition-colors" />
+                <span className="group-hover:text-blue-500 transition-colors">Filters</span>
+                <ChevronDown
+                  size={16}
+                  className={`transform transition-transform group-hover:text-blue-500 ${isFilterOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
 
-                {/* Tags Filter */}
-                <div>
-                  <h3 className="font-medium mb-3">Filter by tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {allTags.map(tag => (
-                      <button
-                        key={tag}
-                        onClick={() => toggleTag(tag)}
-                        className={`px-4 py-2 rounded-xl text-sm transition-all ${
-                          selectedTags.includes(tag)
-                            ? 'bg-blue-500 text-white shadow-md hover:bg-blue-600'
-                            : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
-                        }`}
-                      >
-                        {tag}
-                      </button>
-                    ))}
+              {isFilterOpen && (
+                <div className="absolute top-full left-0 right-0 mt-2 p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl z-10 animate-scale-up">
+                  {/* Sort Options */}
+                  <div className="mb-6">
+                    <h3 className="font-medium mb-3">Sort by</h3>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as SortOption)}
+                      className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    >
+                      <option value="newest">Newest First</option>
+                      <option value="oldest">Oldest First</option>
+                      <option value="title">Title</option>
+                    </select>
+                  </div>
+
+                  {/* Tags Filter */}
+                  <div>
+                    <h3 className="font-medium mb-3">Filter by tags</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {allTags.map(tag => (
+                        <button
+                          key={tag}
+                          onClick={() => toggleTag(tag)}
+                          className={`px-4 py-2 rounded-xl text-sm transition-all ${
+                            selectedTags.includes(tag)
+                              ? 'bg-blue-500 text-white shadow-md hover:bg-blue-600'
+                              : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
+              )}
+            </div>
+
+            {/* Active Filters Display */}
+            {selectedTags.length > 0 && (
+              <div className="flex flex-wrap items-center gap-3 pt-2 animate-slide-up">
+                {selectedTags.map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm bg-blue-500 text-white shadow-sm hover:bg-blue-600 hover:shadow-md transition-all"
+                  >
+                    {tag}
+                    <X size={14} />
+                  </button>
+                ))}
+                <button
+                  onClick={() => setSelectedTags([])}
+                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                >
+                  Clear all
+                </button>
               </div>
             )}
           </div>
 
-          {/* Active Filters Display */}
-          {selectedTags.length > 0 && (
-            <div className="flex flex-wrap items-center gap-3 pt-2 animate-slide-up">
-              {selectedTags.map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm bg-blue-500 text-white shadow-sm hover:bg-blue-600 hover:shadow-md transition-all"
-                >
-                  {tag}
-                  <X size={14} />
-                </button>
-              ))}
-              <button
-                onClick={() => setSelectedTags([])}
-                className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
-              >
-                Clear all
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Posts Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {filteredPosts.length === 0 ? (
-            <div className="col-span-2 text-center py-16 animate-fade-in">
-              <p className="text-gray-500 dark:text-gray-400">No posts found matching your criteria.</p>
-            </div>
-          ) : (
-            filteredPosts.map((post, index) => (
-              <PostCard key={post._id} post={post} index={index} />
-            ))
-          )}
-        </div>
-      </section>
-    </div>
+          {/* Posts Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {filteredPosts.length === 0 ? (
+              <div className="col-span-2 text-center py-16 animate-fade-in">
+                <p className="text-gray-500 dark:text-gray-400">No posts found matching your criteria.</p>
+              </div>
+            ) : (
+              filteredPosts.map((post, index) => (
+                <PostCard key={post._id} post={post} index={index} />
+              ))
+            )}
+          </div>
+        </section>
+      </div>
+    </>
   );
 }
 
