@@ -14,15 +14,22 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['lucide-react'],
-    include: ['@splinetool/runtime', '@splinetool/react-spline'],
+    include: ['@splinetool/runtime', '@splinetool/react-spline', 'lucide-react'],
   },
   build: {
     rollupOptions: {
       external: ['@splinetool/runtime', '@splinetool/react-spline'],
     },
     commonjsOptions: {
-      include: [/@splinetool\/.*/],
+      include: [/@splinetool\/.*/, /lucide-react/],
+      defaultIsModuleExports: true,
+    },
+  },
+  resolve: {
+    mainFields: ['module', 'main', 'browser'],
+    alias: {
+      'react': 'react',
+      'react-dom': 'react-dom',
     },
   },
 });
