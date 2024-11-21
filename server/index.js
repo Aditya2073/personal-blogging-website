@@ -29,13 +29,34 @@ if (missingEnvVars.length > 0) {
   process.exit(1);
 }
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => {
+// Connect to MongoDB with automatic reconnection
+const connectToMongoDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    console.log('Connected to MongoDB');
+  } catch (err) {
     console.error('MongoDB connection error:', err);
-    process.exit(1);
-  });
+    // Retry connection after 5 seconds
+    setTimeout(connectToMongoDB, 5000);
+  }
+};
+
+// Handle MongoDB connection events
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected. Attempting to reconnect...');
+  connectToMongoDB();
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+  mongoose.disconnect(); // This will trigger the 'disconnected' event
+});
+
+// Initial connection
+connectToMongoDB();
 
 // Create Express app
 const app = express();
@@ -538,7 +559,23 @@ app.post('/api/subscribers/unsubscribe', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
+// Add keep-alive endpoint
+app.get('/api/health', (req, res) => {
+  const healthcheck = {
+    uptime: process.uptime(),
+    message: 'OK',
+    timestamp: Date.now()
+  };
+  try {
+    res.send(healthcheck);
+  } catch (e) {
+    healthcheck.message = e;
+    res.status(503).send();
+  }
+});
+
+// Start server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
