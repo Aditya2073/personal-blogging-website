@@ -15,11 +15,14 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['lucide-react'],
-    include: ['@splinetool/runtime'],
+    include: ['@splinetool/runtime', '@splinetool/react-spline'],
   },
   build: {
+    rollupOptions: {
+      external: ['@splinetool/runtime', '@splinetool/react-spline'],
+    },
     commonjsOptions: {
-      include: [/@splinetool\/runtime/],
+      include: [/@splinetool\/.*/],
     },
   },
 });
