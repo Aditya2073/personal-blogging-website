@@ -97,7 +97,7 @@ const PrivacyPolicy = () => {
             <p>
               If you have any questions about this Privacy Policy, please contact us at{' '}
               <a href="mailto:adityarasal2073@gmail.com" className="text-blue-600 dark:text-blue-400">
-                adityarasal2073@gmail.com
+                adirasal2003@gmail.com
               </a>
             </p>
           </section>
