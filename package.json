@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && node scripts/generateSitemap.js",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "server": "node server/start.js",
-    "start": "./dev.sh"
+    "start": "./dev.sh",
+    "generate-sitemap": "node scripts/generateSitemap.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -8,14 +8,8 @@ import About from './components/About';
 import Newsletter from './components/Newsletter';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
-import generateSitemap from './utils/generateSitemap';
 
 function App() {
-  React.useEffect(() => {
-    // Generate sitemap when the app starts
-    generateSitemap();
-  }, []);
-
   return (
     <ThemeProvider>
       <Router>
