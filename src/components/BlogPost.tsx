@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ArrowLeft, Clock, Calendar, Tag, Share2 } from 'lucide-react';
@@ -6,11 +6,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../config';
 import { Helmet } from 'react-helmet';
 import GoogleAd from './GoogleAd';
+import { marked } from 'marked';
+import hljs from 'highlight.js';
 
-const ReactMarkdown = lazy(() => import('react-markdown'));
-const remarkGfm = lazy(() => import('remark-gfm'));
-const rehypeRaw = lazy(() => import('rehype-raw'));
-const rehypeHighlight = lazy(() => import('rehype-highlight'));
+// Configure marked with syntax highlighting
+marked.setOptions({
+  highlight: function(code, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(code, { language: lang }).value;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    return code;
+  },
+  breaks: true,
+  gfm: true
+});
 
 interface BlogPost {
   _id: string;
@@ -295,30 +308,12 @@ export default function BlogPost() {
                 prose-code:text-blue-600 dark:prose-code:text-blue-400 prose-code:bg-blue-50/50 dark:prose-code:bg-blue-900/20
                 prose-code:px-2 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none"
             >
-              <Suspense fallback={<div className="animate-pulse">Loading content...</div>}>
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw, rehypeHighlight]}
-                  components={{
-                    a: ({node, ...props}) => (
-                      <a {...props} target="_blank" rel="noopener noreferrer" />
-                    ),
-                    img: ({node, ...props}) => (
-                      <img {...props} loading="lazy" className="rounded-xl shadow-lg hover:shadow-xl transition-shadow" />
-                    ),
-                    code: ({node, inline, ...props}) => (
-                      inline 
-                        ? <code {...props} className="bg-blue-50/50 dark:bg-blue-900/20 px-2 py-0.5 rounded-md" />
-                        : <code {...props} />
-                    ),
-                    pre: ({node, ...props}) => (
-                      <pre {...props} className="bg-gray-900 p-4 rounded-xl overflow-auto" />
-                    )
-                  }}
-                >
-                  {post.content}
-                </ReactMarkdown>
-              </Suspense>
+              <div dangerouslySetInnerHTML={{ 
+                __html: marked.parse(post.content, { 
+                  mangle: false,
+                  headerIds: false
+                }) 
+              }} />
             </motion.div>
 
             {/* Square Ad */}
