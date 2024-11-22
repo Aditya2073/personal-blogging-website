@@ -10,6 +10,9 @@ import Newsletter from './components/Newsletter';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import CookieConsent from './components/CookieConsent';
+import AdminLogin from './components/AdminLogin';
+import AdminPanel from './components/AdminPanel';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -25,6 +28,15 @@ function App() {
               <Route path="/newsletter" element={<Newsletter />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/login" element={<AdminLogin />} />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminPanel />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </main>
           <Footer />
