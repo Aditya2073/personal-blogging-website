@@ -178,7 +178,7 @@ export default function BlogPost() {
             {/* Main Content */}
             <div className="flex-1">
               <Link
-                to="/blog"
+                to="/"
                 className="inline-flex items-center text-blue-500 hover:text-blue-600 mb-8"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
