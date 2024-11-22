@@ -31,7 +31,7 @@ const Comments: React.FC<CommentsProps> = ({ postId }) => {
 
   const fetchComments = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/comments/${postId}`);
+      const response = await fetch(`${API_BASE_URL}/comments/${postId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch comments');
       }
@@ -50,15 +50,15 @@ const Comments: React.FC<CommentsProps> = ({ postId }) => {
     if (!newComment.trim() || !author.trim()) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/comments`, {
+      const response = await fetch(`${API_BASE_URL}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           postId,
-          content: newComment,
-          author,
+          content: newComment.trim(),
+          author: author.trim(),
         }),
       });
 
@@ -66,9 +66,10 @@ const Comments: React.FC<CommentsProps> = ({ postId }) => {
         throw new Error('Failed to post comment');
       }
 
-      const data = await response.json();
-      setComments([...comments, data]);
+      const newCommentData = await response.json();
+      setComments((prevComments) => [newCommentData, ...prevComments]);
       setNewComment('');
+      setAuthor('');
     } catch (err) {
       setError('Failed to post comment');
       console.error('Error posting comment:', err);
@@ -77,7 +78,7 @@ const Comments: React.FC<CommentsProps> = ({ postId }) => {
 
   const handleLike = async (commentId: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/comments/${commentId}/like`, {
+      const response = await fetch(`${API_BASE_URL}/comments/${commentId}/like`, {
         method: 'POST',
       });
 
@@ -86,17 +87,20 @@ const Comments: React.FC<CommentsProps> = ({ postId }) => {
       }
 
       const updatedComment = await response.json();
-      setComments(comments.map(comment => 
-        comment._id === commentId ? updatedComment : comment
-      ));
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment._id === commentId ? updatedComment : comment
+        )
+      );
     } catch (err) {
+      setError('Failed to like comment');
       console.error('Error liking comment:', err);
     }
   };
 
   const handleFlag = async (commentId: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/comments/${commentId}/flag`, {
+      const response = await fetch(`${API_BASE_URL}/comments/${commentId}/flag`, {
         method: 'POST',
       });
 
@@ -105,17 +109,20 @@ const Comments: React.FC<CommentsProps> = ({ postId }) => {
       }
 
       const updatedComment = await response.json();
-      setComments(comments.map(comment => 
-        comment._id === commentId ? updatedComment : comment
-      ));
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment._id === commentId ? updatedComment : comment
+        )
+      );
     } catch (err) {
+      setError('Failed to flag comment');
       console.error('Error flagging comment:', err);
     }
   };
 
   const handleDelete = async (commentId: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/comments/${commentId}`, {
+      const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
         method: 'DELETE',
       });
 
@@ -123,60 +130,53 @@ const Comments: React.FC<CommentsProps> = ({ postId }) => {
         throw new Error('Failed to delete comment');
       }
 
-      setComments(comments.filter(comment => comment._id !== commentId));
+      setComments((prevComments) =>
+        prevComments.filter((comment) => comment._id !== commentId)
+      );
     } catch (err) {
+      setError('Failed to delete comment');
       console.error('Error deleting comment:', err);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="animate-pulse p-4">
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
-        <div className="space-y-3">
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
-        </div>
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900 dark:border-white"></div>
       </div>
     );
   }
 
   return (
-    <div className="mt-12">
+    <div className="max-w-2xl mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
         <MessageCircle className="w-6 h-6" />
         Comments
       </h2>
 
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg mb-6">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="mb-8">
-        <div className="mb-4">
+      <form onSubmit={handleSubmit} className="mb-8 space-y-4">
+        <div>
           <input
             type="text"
+            placeholder="Your name"
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
-            placeholder="Your name"
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-shadow"
+            className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700"
             required
           />
         </div>
         <div className="flex gap-2">
           <input
             type="text"
+            placeholder="Write a comment..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write a comment..."
-            className="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-shadow"
+            className="flex-1 p-2 border rounded dark:bg-gray-800 dark:border-gray-700"
             required
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2 transition-colors"
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex items-center gap-2"
           >
             <Send className="w-4 h-4" />
             Post
@@ -184,74 +184,59 @@ const Comments: React.FC<CommentsProps> = ({ postId }) => {
         </div>
       </form>
 
+      {error && (
+        <div className="text-red-500 mb-4 text-center">{error}</div>
+      )}
+
       <AnimatePresence>
-        {comments.length > 0 ? (
+        {comments.map((comment) => (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="space-y-4"
+            key={comment._id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="border-b dark:border-gray-700 py-4"
           >
-            {comments.map((comment) => (
-              <motion.div
-                key={comment._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="font-semibold">{comment.author}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(comment.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleLike(comment._id)}
-                      className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                        comment.isLiked ? 'text-blue-500 dark:text-blue-400' : ''
-                      }`}
-                    >
-                      <ThumbsUp className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleFlag(comment._id)}
-                      className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                        comment.isFlagged ? 'text-red-500 dark:text-red-400' : ''
-                      }`}
-                    >
-                      <Flag className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(comment._id)}
-                      className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-500 dark:text-gray-400"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-                <p className="text-gray-700 dark:text-gray-300">{comment.content}</p>
-                {comment.likes > 0 && (
-                  <div className="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                    <ThumbsUp className="w-3 h-3" />
-                    {comment.likes} {comment.likes === 1 ? 'like' : 'likes'}
-                  </div>
-                )}
-              </motion.div>
-            ))}
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h3 className="font-semibold">{comment.author}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {new Date(comment.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleLike(comment._id)}
+                  className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                    comment.isLiked ? 'text-blue-500' : ''
+                  }`}
+                >
+                  <ThumbsUp className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleFlag(comment._id)}
+                  className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                    comment.isFlagged ? 'text-red-500' : ''
+                  }`}
+                >
+                  <Flag className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleDelete(comment._id)}
+                  className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-red-500"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <p className="text-gray-700 dark:text-gray-300">{comment.content}</p>
+            {comment.likes > 0 && (
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                {comment.likes} like{comment.likes !== 1 ? 's' : ''}
+              </p>
+            )}
           </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="text-center py-8 text-gray-500 dark:text-gray-400"
-          >
-            No comments yet. Be the first to comment!
-          </motion.div>
-        )}
+        ))}
       </AnimatePresence>
     </div>
   );
