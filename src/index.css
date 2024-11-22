@@ -1,9 +1,9 @@
+/* Add syntax highlighting styles */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Add syntax highlighting styles */
-@import url('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css');
 
 .hljs {
   background: transparent !important;
