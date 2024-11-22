@@ -6,6 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../config';
 import { Helmet } from 'react-helmet';
 import GoogleAd from './GoogleAd';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import rehypeHighlight from 'rehype-highlight';
 
 interface BlogPost {
   _id: string;
@@ -286,10 +290,34 @@ export default function BlogPost() {
                 prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50/50 dark:prose-blockquote:bg-blue-900/20
                 prose-blockquote:px-6 prose-blockquote:py-4 prose-blockquote:not-italic
                 prose-img:rounded-xl prose-img:shadow-lg hover:prose-img:shadow-xl prose-img:transition-shadow
+                prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800
                 prose-code:text-blue-600 dark:prose-code:text-blue-400 prose-code:bg-blue-50/50 dark:prose-code:bg-blue-900/20
                 prose-code:px-2 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none"
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
+            >
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw, rehypeHighlight]}
+                components={{
+                  // Custom components for markdown elements
+                  a: ({node, ...props}) => (
+                    <a {...props} target="_blank" rel="noopener noreferrer" />
+                  ),
+                  img: ({node, ...props}) => (
+                    <img {...props} loading="lazy" className="rounded-xl shadow-lg hover:shadow-xl transition-shadow" />
+                  ),
+                  code: ({node, inline, ...props}) => (
+                    inline 
+                      ? <code {...props} className="bg-blue-50/50 dark:bg-blue-900/20 px-2 py-0.5 rounded-md" />
+                      : <code {...props} />
+                  ),
+                  pre: ({node, ...props}) => (
+                    <pre {...props} className="bg-gray-900 p-4 rounded-xl overflow-auto" />
+                  )
+                }}
+              >
+                {post.content}
+              </ReactMarkdown>
+            </motion.div>
 
             {/* Square Ad */}
             <div className="my-8 flex justify-center">
