@@ -208,6 +208,24 @@ function Navbar() {
                     </Link>
                   </motion.div>
                 ))}
+
+                {/* Footer Links in Mobile Menu */}
+                <div className="border-t border-gray-200 dark:border-gray-800 mt-4 pt-4">
+                  <Link
+                    to="/privacy-policy"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block py-2 px-4 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
+                  >
+                    Privacy Policy
+                  </Link>
+                  <Link
+                    to="/terms-of-service"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block py-2 px-4 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
+                  >
+                    Terms of Service
+                  </Link>
+                </div>
               </motion.div>
             </motion.div>
           )}

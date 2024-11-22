@@ -1,43 +1,36 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Navbar from './components/Navbar';
 import BlogList from './components/BlogList';
 import BlogPost from './components/BlogPost';
-import AdminPanel from './components/AdminPanel';
 import About from './components/About';
 import Newsletter from './components/Newsletter';
-import NewsletterManager from './components/NewsletterManager';
-import ConfirmSubscription from './components/ConfirmSubscription';
-import Login from './components/Login';
-import PrivacyPolicy from './components/PrivacyPolicy';
-import TermsOfService from './components/TermsOfService';
-import Footer from './components/Footer';
-import { ThemeProvider } from './contexts/ThemeContext';
-import './styles/patterns.css';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import generateSitemap from './utils/generateSitemap';
 
 function App() {
+  React.useEffect(() => {
+    // Generate sitemap when the app starts
+    generateSitemap();
+  }, []);
+
   return (
     <ThemeProvider>
       <Router>
-        <div className="min-h-screen bg-white dark:bg-[#0a0b14] text-gray-900 dark:text-white transition-colors flex flex-col">
+        <div className="min-h-screen bg-white dark:bg-[#0a0b14] text-gray-900 dark:text-gray-100 transition-colors">
           <Navbar />
-          <main className="container mx-auto px-4 py-8 flex-grow">
+          <main className="pt-20">
             <Routes>
               <Route path="/" element={<BlogList />} />
               <Route path="/blog/:id" element={<BlogPost />} />
-              <Route path="/admin" element={<AdminPanel />} />
-              <Route path="/admin/newsletter" element={<NewsletterManager />} />
               <Route path="/about" element={<About />} />
               <Route path="/newsletter" element={<Newsletter />} />
-              <Route path="/confirm-subscription" element={<ConfirmSubscription />} />
-              <Route path="/login" element={<Login />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
-              {/* Redirect any unknown routes to home */}
-              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
-          <Footer />
         </div>
       </Router>
     </ThemeProvider>
