@@ -13,6 +13,9 @@ export default defineConfig({
       },
     },
   },
+  optimizeDeps: {
+    include: ['react-markdown', 'rehype-raw', 'rehype-highlight', 'remark-gfm']
+  },
   build: {
     target: 'es2020',
     rollupOptions: {
@@ -21,6 +24,7 @@ export default defineConfig({
           vendor: ['react', 'react-dom', 'react-router-dom'],
         },
       },
+      external: ['highlight.js/styles/github-dark.css']
     },
   },
   resolve: {
