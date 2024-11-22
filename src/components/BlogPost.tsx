@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ArrowLeft, Clock, Calendar, Tag, Share2 } from 'lucide-react';
@@ -8,6 +8,9 @@ import { Helmet } from 'react-helmet';
 import GoogleAd from './GoogleAd';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
+import Comments from './Comments';
+import ShareButtons from './ShareButtons';
+import TableOfContents from './TableOfContents';
 
 // Configure marked with syntax highlighting
 marked.setOptions({
@@ -40,6 +43,7 @@ export default function BlogPost() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -154,183 +158,95 @@ export default function BlogPost() {
     );
   }
 
-  const getMetaDescription = (content: string) => {
-    const firstParagraph = content.split('\n')[0];
-    return firstParagraph.length > 160 
-      ? firstParagraph.substring(0, 157) + '...'
-      : firstParagraph;
-  };
+  if (post) {
+    return (
+      <>
+        <Helmet>
+          <title>{post.title}</title>
+          <meta name="description" content={post.content.slice(0, 160)} />
+          <meta property="og:title" content={post.title} />
+          <meta property="og:description" content={post.content.slice(0, 160)} />
+          {post.coverImage && <meta property="og:image" content={post.coverImage} />}
+        </Helmet>
 
-  const sharePost = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: post.title,
-        text: `Check out this blog post: ${post.title}`,
-        url: window.location.href,
-      });
-    }
-  };
-
-  return (
-    <>
-      <Helmet>
-        <title>{post.title} | Aditya's Blogs</title>
-        <meta name="description" content={getMetaDescription(post.content)} />
-        <meta name="keywords" content={post.tags.join(', ')} />
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={getMetaDescription(post.content)} />
-        <meta property="og:image" content={post.coverImage} />
-        <meta property="og:url" content={`https://adityasblogs.netlify.app/blog/${post._id}`} />
-        <link rel="canonical" href={`https://adityasblogs.netlify.app/blog/${post._id}`} />
-      </Helmet>
-      <AnimatePresence>
         <motion.article 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-[#0a0b14] transition-colors"
+          className="max-w-7xl mx-auto px-4 py-12"
         >
-          {/* Hero Section */}
-          <div className="relative h-[70vh] min-h-[600px] w-full overflow-hidden">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm z-10"
-            />
-            <motion.img
-              initial={{ scale: 1.1 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.6 }}
-              src={post.coverImage}
-              alt={post.title}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            
-            <div className="absolute inset-0 z-20">
-              <div className="max-w-5xl mx-auto px-4 h-full flex flex-col justify-end pb-16">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <Link 
-                    to="/"
-                    className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-8 group transition-colors"
-                  >
-                    <ArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-                    <span>Back to Blog</span>
-                  </Link>
-                  
-                  <motion.h1 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="text-5xl md:text-6xl font-bold text-white mb-6 [text-wrap:balance]"
-                  >
-                    {post.title}
-                  </motion.h1>
-                  
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="flex flex-wrap items-center gap-6 text-white/80"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      <time>{format(new Date(post.date), 'MMMM d, yyyy')}</time>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      <span>{post.readingTime}</span>
-                    </div>
-                    <button 
-                      onClick={sharePost}
-                      className="flex items-center gap-2 hover:text-white transition-colors"
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Main Content */}
+            <div className="flex-1">
+              <Link
+                to="/blog"
+                className="inline-flex items-center text-blue-500 hover:text-blue-600 mb-8"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Blog
+              </Link>
+
+              <header className="mb-8">
+                <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
+                
+                <div className="flex flex-wrap items-center gap-4 text-gray-600 dark:text-gray-400 mb-4">
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    {format(new Date(post.date), 'MMMM d, yyyy')}
+                  </div>
+                  <div className="flex items-center">
+                    <Clock className="w-4 h-4 mr-2" />
+                    {post.readingTime}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {post.tags.map((tag) => (
+                    <Link
+                      key={tag}
+                      to={`/blog?tag=${tag}`}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     >
-                      <Share2 className="w-4 h-4" />
-                      <span>Share</span>
-                    </button>
-                  </motion.div>
-                </motion.div>
-              </div>
+                      <Tag className="w-3 h-3 mr-1" />
+                      {tag}
+                    </Link>
+                  ))}
+                </div>
+
+                {post.coverImage && (
+                  <img
+                    src={post.coverImage}
+                    alt={post.title}
+                    className="w-full h-auto rounded-lg shadow-lg mb-8"
+                  />
+                )}
+
+                <div className="flex items-center justify-between">
+                  <ShareButtons
+                    url={window.location.href}
+                    title={post.title}
+                    description={post.content.slice(0, 160)}
+                  />
+                </div>
+              </header>
+
+              <div
+                ref={contentRef}
+                className="prose prose-lg dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: marked(post.content) }}
+              />
+
+              <GoogleAd />
+
+              <Comments postId={id || ''} />
+            </div>
+
+            {/* Sidebar */}
+            <div className="lg:w-64">
+              <TableOfContents contentRef={contentRef} />
             </div>
           </div>
-
-          {/* Content Section */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="max-w-4xl mx-auto px-4 py-16"
-          >
-            {/* Tags */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              className="flex flex-wrap gap-2 mb-12"
-            >
-              {post.tags.map((tag, index) => (
-                <motion.span
-                  key={tag}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.8 + index * 0.1 }}
-                  className="px-4 py-2 rounded-full text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800 hover:scale-105 transition-transform"
-                >
-                  <Tag className="w-3 h-3 inline-block mr-1" />
-                  {tag}
-                </motion.span>
-              ))}
-            </motion.div>
-
-            {/* Top Ad - Homepage */}
-            <div className="mb-8">
-              <GoogleAd />
-            </div>
-
-            {/* Article Content */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.9 }}
-              className="prose prose-lg dark:prose-invert max-w-none
-                prose-headings:font-bold prose-headings:tracking-tight
-                prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6
-                prose-p:text-gray-600 dark:prose-p:text-gray-300 prose-p:leading-relaxed
-                prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
-                prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50/50 dark:prose-blockquote:bg-blue-900/20
-                prose-blockquote:px-6 prose-blockquote:py-4 prose-blockquote:not-italic
-                prose-img:rounded-xl prose-img:shadow-lg hover:prose-img:shadow-xl prose-img:transition-shadow
-                prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800
-                prose-code:text-blue-600 dark:prose-code:text-blue-400 prose-code:bg-blue-50/50 dark:prose-code:bg-blue-900/20
-                prose-code:px-2 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none"
-            >
-              <div dangerouslySetInnerHTML={{ 
-                __html: marked.parse(post.content, { 
-                  mangle: false,
-                  headerIds: false
-                }) 
-              }} />
-            </motion.div>
-
-            {/* Square Ad */}
-            <div className="my-8 flex justify-center">
-              <GoogleAd 
-                slot="1899311193"
-                format="rectangle"
-                style={{ 
-                  display: 'inline-block',
-                  width: '336px',
-                  height: '280px'
-                }}
-              />
-            </div>
-          </motion.div>
         </motion.article>
-      </AnimatePresence>
-    </>
-  );
+      </>
+    );
+  }
 }
