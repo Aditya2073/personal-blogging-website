@@ -7,14 +7,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
       },
     },
-  },
-  optimizeDeps: {
-    include: ['react-markdown', 'rehype-raw', 'rehype-highlight', 'remark-gfm']
   },
   build: {
     target: 'es2020',
@@ -22,9 +19,9 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
+          markdown: ['react-markdown', 'rehype-raw', 'rehype-highlight', 'remark-gfm'],
         },
       },
-      external: ['highlight.js/styles/github-dark.css']
     },
   },
   resolve: {
@@ -33,4 +30,8 @@ export default defineConfig({
       'react-dom': 'react-dom',
     },
   },
+  optimizeDeps: {
+    include: ['react-markdown', 'rehype-raw', 'rehype-highlight', 'remark-gfm'],
+    exclude: ['highlight.js/styles/github-dark.css']
+  }
 });
