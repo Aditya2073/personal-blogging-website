@@ -2,8 +2,10 @@
   "name": "personal-blog-server",
   "version": "1.0.0",
   "type": "module",
+  "main": "index.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "keep-alive": "node keep-alive.js"
   },
   "dependencies": {
@@ -17,5 +19,8 @@
     "mongoose": "^8.2.1",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.16"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }

@@ -14,6 +14,7 @@ import Post from './models/Post.js';
 import Subscriber from './models/Subscriber.js';
 import Newsletter from './models/Newsletter.js';
 import newsletterRoutes from './routes/newsletterRoutes.js';
+import commentsRouter from './routes/comments.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -83,6 +84,26 @@ transporter.verify(function(error, success) {
   }
 });
 
+// Middleware
+app.use(cors({
+  origin: [
+    'https://adityasblogs.netlify.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
+  credentials: true
+}));
+app.use(express.json());
+app.use(cookieParser());
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`\n=== ${new Date().toISOString()} ===`);
+  console.log(`${req.method} ${req.url}`);
+  console.log('Headers:', req.headers);
+  next();
+});
+
 // Define allowed origins
 const allowedOrigins = [
   'http://localhost:5173',
@@ -122,33 +143,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Configure middleware
-app.use(express.json());
-app.use(cookieParser());
-
-// Request logging middleware
-app.use((req, res, next) => {
-  console.log(`\n=== ${new Date().toISOString()} ===`);
-  console.log(`${req.method} ${req.url}`);
-  console.log('Headers:', req.headers);
-  next();
-});
-
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({ error: 'Internal server error' });
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something went wrong!' });
 });
 
-// Log loaded environment variables (excluding sensitive data)
-console.log('Environment variables loaded:');
-console.log('- ADMIN_USERNAME:', process.env.ADMIN_USERNAME);
-console.log('- JWT_SECRET length:', process.env.JWT_SECRET?.length || 0);
-console.log('- ADMIN_PASSWORD length:', process.env.ADMIN_PASSWORD?.length || 0);
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '$2a$10$XQDz5YNPZ5Gg/F3QqhGHr.bfbGZkD5KnzNqVGXfnZ7ULr8FFpxm3e'; // hashed password for 'adminpassword'
+// Routes
+app.use('/api/comments', commentsRouter);
+app.use('/api/newsletter', newsletterRoutes);
 
 // Public routes - no authentication required
 app.get('/api/posts', async (req, res) => {
@@ -574,7 +577,16 @@ app.get('/api/health', (req, res) => {
   }
 });
 
-// Start server
+// Log loaded environment variables (excluding sensitive data)
+console.log('Environment variables loaded:');
+console.log('- ADMIN_USERNAME:', process.env.ADMIN_USERNAME);
+console.log('- JWT_SECRET length:', process.env.JWT_SECRET?.length || 0);
+console.log('- ADMIN_PASSWORD length:', process.env.ADMIN_PASSWORD?.length || 0);
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '$2a$10$XQDz5YNPZ5Gg/F3QqhGHr.bfbGZkD5KnzNqVGXfnZ7ULr8FFpxm3e'; // hashed password for 'adminpassword'
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
