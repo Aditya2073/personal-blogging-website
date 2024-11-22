@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import BlogList from './components/BlogList';
 import BlogPost from './components/BlogPost';
 import About from './components/About';
@@ -13,9 +14,9 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
-        <div className="min-h-screen bg-white dark:bg-[#0a0b14] text-gray-900 dark:text-gray-100 transition-colors">
+        <div className="min-h-screen flex flex-col bg-white dark:bg-[#0a0b14] text-gray-900 dark:text-gray-100 transition-colors">
           <Navbar />
-          <main className="pt-20">
+          <main className="flex-grow pt-20 pb-16">
             <Routes>
               <Route path="/" element={<BlogList />} />
               <Route path="/blog/:id" element={<BlogPost />} />
@@ -25,6 +26,7 @@ function App() {
               <Route path="/terms-of-service" element={<TermsOfService />} />
             </Routes>
           </main>
+          <Footer />
         </div>
       </Router>
     </ThemeProvider>
