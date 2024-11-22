@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
-import { ThemeContext } from '../contexts/ThemeContext';
-import { MessageSquare, ThumbsUp, Flag, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MessageCircle, ThumbsUp, Flag, Trash2, Send } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 interface Comment {
-  id: string;
-  author: string;
+  _id: string;
+  postId: string;
   content: string;
-  date: string;
+  author: string;
+  createdAt: string;
   likes: number;
   isLiked: boolean;
-  replies?: Comment[];
+  isFlagged: boolean;
 }
 
 interface CommentsProps {
@@ -18,178 +19,240 @@ interface CommentsProps {
 }
 
 const Comments: React.FC<CommentsProps> = ({ postId }) => {
-  const { darkMode } = React.useContext(ThemeContext);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [author, setAuthor] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
+  useEffect(() => {
+    fetchComments();
+  }, [postId]);
 
-    setIsSubmitting(true);
+  const fetchComments = async () => {
     try {
-      // TODO: Implement API call to save comment
-      const comment: Comment = {
-        id: Date.now().toString(),
-        author: 'Anonymous', // TODO: Replace with actual user name
-        content: newComment,
-        date: new Date().toISOString(),
-        likes: 0,
-        isLiked: false,
-      };
-
-      setComments([comment, ...comments]);
-      setNewComment('');
-    } catch (error) {
-      console.error('Failed to submit comment:', error);
+      const response = await fetch(`${API_BASE_URL}/api/comments/${postId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch comments');
+      }
+      const data = await response.json();
+      setComments(data);
+    } catch (err) {
+      setError('Failed to load comments');
+      console.error('Error fetching comments:', err);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  const handleLikeComment = async (commentId: string) => {
-    setComments(
-      comments.map(comment =>
-        comment.id === commentId
-          ? { ...comment, likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1, isLiked: !comment.isLiked }
-          : comment
-      )
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || !author.trim()) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          postId,
+          content: newComment,
+          author,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to post comment');
+      }
+
+      const data = await response.json();
+      setComments([...comments, data]);
+      setNewComment('');
+    } catch (err) {
+      setError('Failed to post comment');
+      console.error('Error posting comment:', err);
+    }
+  };
+
+  const handleLike = async (commentId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/comments/${commentId}/like`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to like comment');
+      }
+
+      const updatedComment = await response.json();
+      setComments(comments.map(comment => 
+        comment._id === commentId ? updatedComment : comment
+      ));
+    } catch (err) {
+      console.error('Error liking comment:', err);
+    }
+  };
+
+  const handleFlag = async (commentId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/comments/${commentId}/flag`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to flag comment');
+      }
+
+      const updatedComment = await response.json();
+      setComments(comments.map(comment => 
+        comment._id === commentId ? updatedComment : comment
+      ));
+    } catch (err) {
+      console.error('Error flagging comment:', err);
+    }
+  };
+
+  const handleDelete = async (commentId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/comments/${commentId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete comment');
+      }
+
+      setComments(comments.filter(comment => comment._id !== commentId));
+    } catch (err) {
+      console.error('Error deleting comment:', err);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="animate-pulse p-4">
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
+        <div className="space-y-3">
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+        </div>
+      </div>
     );
-  };
-
-  const handleDeleteComment = async (commentId: string) => {
-    // TODO: Implement API call to delete comment
-    setComments(comments.filter(comment => comment.id !== commentId));
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
+  }
 
   return (
-    <div className={`mt-8 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-      <h3 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-        <MessageSquare className="w-6 h-6" />
-        Comments ({comments.length})
-      </h3>
+    <div className="mt-12">
+      <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+        <MessageCircle className="w-6 h-6" />
+        Comments
+      </h2>
 
-      {/* Comment Form */}
-      <form onSubmit={handleSubmitComment} className="mb-8">
-        <textarea
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Share your thoughts..."
-          className={`w-full p-4 rounded-lg border ${
-            darkMode
-              ? 'bg-gray-800 border-gray-700 text-gray-200'
-              : 'bg-white border-gray-200 text-gray-800'
-          } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-          rows={3}
-        />
-        <div className="mt-2 flex justify-end">
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg mb-6">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="mb-8">
+        <div className="mb-4">
+          <input
+            type="text"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            placeholder="Your name"
+            className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-shadow"
+            required
+          />
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Write a comment..."
+            className="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-shadow"
+            required
+          />
           <button
             type="submit"
-            disabled={isSubmitting || !newComment.trim()}
-            className={`px-4 py-2 rounded-lg font-medium ${
-              isSubmitting || !newComment.trim()
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700'
-            } text-white transition-colors`}
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2 transition-colors"
           >
-            {isSubmitting ? 'Posting...' : 'Post Comment'}
+            <Send className="w-4 h-4" />
+            Post
           </button>
         </div>
       </form>
 
-      {/* Comments List */}
       <AnimatePresence>
-        {comments.map((comment) => (
+        {comments.length > 0 ? (
           <motion.div
-            key={comment.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className={`mb-6 p-6 rounded-lg ${
-              darkMode ? 'bg-gray-800' : 'bg-gray-50'
-            }`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="space-y-4"
           >
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    darkMode ? 'bg-gray-700' : 'bg-gray-200'
-                  }`}
-                >
-                  {comment.author[0].toUpperCase()}
+            {comments.map((comment) => (
+              <motion.div
+                key={comment._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="font-semibold">{comment.author}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(comment.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleLike(comment._id)}
+                      className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                        comment.isLiked ? 'text-blue-500 dark:text-blue-400' : ''
+                      }`}
+                    >
+                      <ThumbsUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleFlag(comment._id)}
+                      className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                        comment.isFlagged ? 'text-red-500 dark:text-red-400' : ''
+                      }`}
+                    >
+                      <Flag className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(comment._id)}
+                      className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-500 dark:text-gray-400"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-medium">{comment.author}</h4>
-                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {formatDate(comment.date)}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleLikeComment(comment.id)}
-                  className={`p-2 rounded-lg transition-colors ${
-                    comment.isLiked
-                      ? 'text-blue-500'
-                      : darkMode
-                      ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                      : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  <ThumbsUp size={18} />
-                </button>
-                <button
-                  className={`p-2 rounded-lg ${
-                    darkMode
-                      ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                      : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100'
-                  } transition-colors`}
-                >
-                  <Flag size={18} />
-                </button>
-                <button
-                  onClick={() => handleDeleteComment(comment.id)}
-                  className={`p-2 rounded-lg ${
-                    darkMode
-                      ? 'text-gray-400 hover:text-red-500 hover:bg-gray-700'
-                      : 'text-gray-400 hover:text-red-500 hover:bg-gray-100'
-                  } transition-colors`}
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            </div>
-            <p className="mt-4">{comment.content}</p>
-            {comment.likes > 0 && (
-              <div className="mt-4 flex items-center gap-1 text-sm text-gray-500">
-                <ThumbsUp size={14} />
-                <span>{comment.likes}</span>
-              </div>
-            )}
+                <p className="text-gray-700 dark:text-gray-300">{comment.content}</p>
+                {comment.likes > 0 && (
+                  <div className="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    <ThumbsUp className="w-3 h-3" />
+                    {comment.likes} {comment.likes === 1 ? 'like' : 'likes'}
+                  </div>
+                )}
+              </motion.div>
+            ))}
           </motion.div>
-        ))}
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="text-center py-8 text-gray-500 dark:text-gray-400"
+          >
+            No comments yet. Be the first to comment!
+          </motion.div>
+        )}
       </AnimatePresence>
-
-      {comments.length === 0 && (
-        <div
-          className={`text-center py-12 ${
-            darkMode ? 'text-gray-400' : 'text-gray-600'
-          }`}
-        >
-          <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p className="text-lg">No comments yet</p>
-          <p className="text-sm mt-1">Be the first to share your thoughts!</p>
-        </div>
-      )}
     </div>
   );
 };

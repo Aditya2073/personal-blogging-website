@@ -9,6 +9,7 @@ import About from './components/About';
 import Newsletter from './components/Newsletter';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
+import CookieConsent from './components/CookieConsent';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             </Routes>
           </main>
           <Footer />
+          <CookieConsent />
         </div>
       </Router>
     </ThemeProvider>
